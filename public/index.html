@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple CRUD App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    input, button {
+      padding: 0.5rem;
+      margin: 0.25rem 0;
+      width: 100%;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .name {
+      flex-grow: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple CRUD App</h1>
+
+  <input type="text" id="itemName" placeholder="Item name" />
+  <button onclick="addItem()">Add Item</button>
+
+  <h2>Items</h2>
+  <ul id="itemsList"></ul>
+
+<script>
+  let editId = null;
+
+  async function fetchItems() {
+    const res = await fetch('/items');
+    const items = await res.json();
+    const list = document.getElementById('itemsList');
+    list.innerHTML = '';
+
+    items.forEach(item => {
+      const li = document.createElement('li');
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = item.name;
+      nameSpan.className = 'name';
+
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Edit';
+      editBtn.onclick = () => {
+        document.getElementById('itemName').value = item.name;
+        editId = item.id;
+      };
+
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.onclick = () => deleteItem(item.id);
+
+      li.appendChild(nameSpan);
+      li.appendChild(editBtn);
+      li.appendChild(delBtn);
+      list.appendChild(li);
+    });
+  }
+
+  async function addItem() {
+    const nameInput = document.getElementById('itemName');
+    const name = nameInput.value.trim();
+    if (!name) return alert("Enter a name.");
+
+    if (editId) {
+      // UPDATE
+      await fetch(`/items/${editId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      editId = null;
+    } else {
+      // CREATE
+      await fetch('/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+    }
+
+    nameInput.value = '';
+    fetchItems();
+  }
+
+  async function deleteItem(id) {
+    await fetch(`/items/${id}`, { method: 'DELETE' });
+    fetchItems();
+  }
+
+  fetchItems();
+</script>
+
+</body>
+</html>
