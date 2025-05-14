@@ -1,0 +1,37 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User List</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <h1>User List</h1>
+  <a href="/create">Add New User</a>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="user-table">
+      <% if (users.length > 0) { %>
+        <% users.forEach(user => { %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.name %></td>
+            <td><%= user.email %></td>
+            <td>
+              <a href="/edit/<%= user.id %>">Edit</a> |
+              <a href="/delete/<%= user.id %>" onclick="return confirm('Are you sure?')">Delete</a>
+            </td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="4">No users found</td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</body>
+</html>
