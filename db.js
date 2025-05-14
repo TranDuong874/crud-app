@@ -1,11 +1,22 @@
-const mariadb = require('mariadb');
+const mysql = require('mysql2');
+const fs = require('fs');
+const path = require('path');
+require('dotenv').config();
 
-const pool = mariadb.createPool({
-  host: 'db',
-  user: 'root',
-  password: 'password',
-  database: 'cruddb',
-  connectionLimit: 5
+const connection = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: {
+    ca: fs.readFileSync('DigiCertGlobalRootCA.crt.pem'),
+    rejectUnauthorized: false  // Disable certificate validation (NOT recommended for production)
+  }
 });
 
-module.exports = pool;
+connection.connect((err) => {
+  if (err) throw err;
+  console.log("Connected to DB!");
+});
+
+module.exports = connection;
